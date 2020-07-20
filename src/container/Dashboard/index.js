@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState, useEffect ,useContext } from 'react';
 import { View, Text, Alert } from 'react-native';
-import { color } from '../../utility';
+import {globalStyle, color} from '../../utility';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
 import { LogOutUser } from '../../network';
 import { clearAsyncStorage } from '../../asyncStorage';
@@ -9,6 +9,9 @@ import firebase from '../../firebase/config';
 import { Store } from "../../context/store";
 import { uuid } from '../../utility/constants';
 import { Profile, ShowUsers } from '../../component'
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlatList } from 'react-native-gesture-handler';
+import profile from '../../component/profile';
 
 const Dashboard = ({ navigation }) => {
   const globalState = useContext(Store);
@@ -19,6 +22,7 @@ const Dashboard = ({ navigation }) => {
     profileImg: ''
   });
 
+  const {name,profileImg} = userDetail;
   const [allUsers,setAllUsers] = useState([]);
 
 
@@ -51,21 +55,47 @@ const Dashboard = ({ navigation }) => {
     });
   }, [navigation]);
 
-  // useEffect(()=>{
-  //   dispatchLoaderAction({
-  //     type: LOADING_START,
-  //   });
-  //   try {
-  //     firebase
-  //     .database().ref
-      
-  //   } catch (error) {
-  //     dispatchLoaderAction({
-  //       type: LOADING_STOP,
-  //     });
-  //     alert(error)
-  //   }
-  // },[])
+  useEffect(() => {
+    // dispatchLoaderAction({
+    //   type: LOADING_START,
+    // });
+    try {
+      firebase
+        .database()
+        .ref("users")
+        .on("value", (dataSnapshot) => {
+          let users = [];
+          let currentUser = {
+            id: "",
+            name: "",
+            profileImg: "",
+          };
+          dataSnapshot.forEach((child) => {
+            if (uuid === child.val().uuid) {
+              currentUser.id = uuid;
+              currentUser.name = child.val().name;
+              currentUser.profileImg = child.val().profileImg;
+            } else {
+              users.push({
+                id: child.val().uuid,
+                name: child.val().name,
+                profileImg: child.val().profileImg,
+              });
+            }
+          });
+          setUserDetail(currentUser);
+          setAllUsers(users);
+          dispatchLoaderAction({
+            type: LOADING_STOP,
+          });
+        });
+    } catch (error) {
+      alert(error);
+      dispatchLoaderAction({
+        type: LOADING_STOP,
+      });
+    }
+  }, []);
 
   const logout = () => {
     LogOutUser()
@@ -80,9 +110,25 @@ const Dashboard = ({ navigation }) => {
   };
 
   return (
-    <View>
-      <Text>Dashboard</Text>
-    </View>
+    <SafeAreaView style={[globalStyle.flex1, {backgroundColor: color.BLACK}]}>
+      <FlatList
+        alwaysBounceVertical={false}
+        data={allUsers}
+        keyExtractor={(_, index) => index.toString()}
+        ListHeaderComponent={
+          <Profile
+          img={profileImg}
+          name={name}
+          />
+        }
+        renderItem={({item})=>(
+          <ShowUsers
+          name={item.name}
+          img={item.profileImg}
+          />
+        )}
+      />
+    </SafeAreaView>
 
   );
 

@@ -12,7 +12,7 @@ import setUniqueValue from '../../utility/constants'
 const SignUp = ({navigation}) => {
 const globalState = useContext(Store);
 const { dispatchLoaderAction } = globalState;
-
+let uuid = "";
   const [credentials, setCredentials] = useState({
     name: '',
     email: '',
@@ -20,6 +20,10 @@ const { dispatchLoaderAction } = globalState;
     confirmPassword: '',
   });
   const {name,email,password,confirmPassword} = credentials;
+
+  const setUniqueValue = (u) => {
+    uuid = u;
+  }
 
   const onSignUpPress = () => {
     //Keyboard.dismiss();
