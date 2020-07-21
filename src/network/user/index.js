@@ -1,4 +1,5 @@
 import firebase from '../../firebase/config'
+import { uuid } from '../../utility/constants';
 
 const AddUser = async (name, email, uid, profileImg) => {
     try {
@@ -16,5 +17,16 @@ const AddUser = async (name, email, uid, profileImg) => {
     }
   };
   
+  export const UpdateUser = async (uuid,imgSource) =>{
+    try {
+      return await firebase.database()
+      .ref("users/" + uuid)
+      .update({
+        profileImg: imgSource,
+      });
+    } catch (error) {
+      return error;
+    }
+  }
 
  export default AddUser;
