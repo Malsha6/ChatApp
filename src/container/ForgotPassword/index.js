@@ -5,21 +5,24 @@ import { globalStyle, color } from '../../utility'
 import { InputField, RoundCornerButton, Logo } from '../../component';
 import { Store } from "../../context/store";
 import { LOADING_START, LOADING_STOP } from "../../context/actions/type";
-import { LoginRequest } from '../../network'
+import { SendRequest } from '../../network'
 import { setAsyncStorage, keys } from '../../asyncStorage';
-import { setUniqueValue } from '../../utility/constants';
+import { setUniqueValue, uuid } from '../../utility/constants';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { keyboardVerticalOffset } from '../../utility/constants'
 import firebase from '../../firebase/config'
 //import {Logo} from '../../component'
 
-const Login = ({ navigation }) => {
+const ForgotPasssword = ({ navigation }) => {
 
     const globalState = useContext(Store);
     const { dispatchLoaderAction } = globalState;
     const [credentials, setCredentials] = useState({
         email: "",
         password: "",
+        currentPassword: "",
+        newPassword: "",
+        newEmail: "",
     });
 
     const { email, password } = credentials;
@@ -31,19 +34,25 @@ const Login = ({ navigation }) => {
         })
     }
 
-    const onLoginPress = () => {
+    const SendRequest = async(email)=>{
+        try {
+            console.log(email);
+            return await firebase.auth().sendPasswordResetEmail(email);
+        } catch (error) {
+            return error;
+        }
+    };
+    
+    const onSendPress = () => {
         if (!email) {
             alert('Email is required');
-        }
-        else if (!password) {
-            alert('Password is required');
         }
         else {
             dispatchLoaderAction({
                 type: LOADING_START,
             });
-            
-            LoginRequest(email, password)
+            console.log(keys.uuid);
+            SendRequest(email)
                 .then((res) => {
                     if (!res.additionalUserInfo) {
                         dispatchLoaderAction({
@@ -52,13 +61,13 @@ const Login = ({ navigation }) => {
                         alert(res);
                         return;
                     }
+                    
                     setAsyncStorage(keys.uuid, res.user.uid);
                     setUniqueValue(res.user.uid);
                     dispatchLoaderAction({
                         type: LOADING_STOP,
                     });
-                    console.log(password);
-                    navigation.replace('Dashboard');
+                    navigation.replace('Login');
                 })
                 .catch((err) => {
                     dispatchLoaderAction({
@@ -66,12 +75,12 @@ const Login = ({ navigation }) => {
                     });
 
                     Alert.alert(
-                        'Incorrect',
-                        'Wrong Email or Password',
+                        'Reset email has been sent',
+                        'Check your mails',
                         [
                             {
                                 text: 'Ok',
-
+                                onPress: () => navigation.navigate('Login'),
                             }
                         ], {
                         cancelabel: false
@@ -98,41 +107,24 @@ const Login = ({ navigation }) => {
                     </View>
 
                     <View style={[globalStyle.flex2, globalStyle.sectionCentered]}>
+                    <Text style={{
+                            fontSize: 18,
+                            fontWeight: "bold",
+                            color: color.WHITE
+                        }}
+                            onPress={() => navigation.navigate('SignUp')}
+                        >
+                            Enter password reset email
+
+                        </Text>
                         <InputField
                             placeholder="Enter email"
                             value={email}
                             onChangeText={(text) => handleonChange('email', text)}
                         />
-                        <InputField
-                            placeholder="Enter password"
-                            value={password}
-                            secureTextEntry={true}
-                            onChangeText={(text) => handleonChange('password', text)}
+                        
+                        <RoundCornerButton title="Send" onPress={() => onSendPress()} />
 
-                        />
-                        <RoundCornerButton title="Login Here" onPress={() => onLoginPress()} />
-
-                        <Text style={{
-                            fontSize: 18,
-                            fontWeight: "bold",
-                            color: color.WHITE
-                        }}
-                            onPress={() => navigation.navigate('ForgotPasssword')}
-                        >
-                            Forgot Password
-
-                        </Text>
-
-                        <Text style={{
-                            fontSize: 20,
-                            fontWeight: "bold",
-                            color: color.LIGHT_GREEN
-                        }}
-                            onPress={() => navigation.navigate('SignUp')}
-                        >
-                            Sign Up
-
-                        </Text>
                     </View>
                 </SafeAreaView>
 
@@ -142,4 +134,4 @@ const Login = ({ navigation }) => {
 };
 
 
-export default Login;
+export default ForgotPasssword;

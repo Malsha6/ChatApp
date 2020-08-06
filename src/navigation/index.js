@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { Login, SignUp, Dashboard, Splash } from '../container';
+import { Login, SignUp, Dashboard, Splash, ShowFullImg ,Chat,ProfileDashboard,ForgotPasssword} from '../container';
 import { color } from '../utility';
 
 
@@ -31,8 +31,7 @@ function NavContainer() {
         <Stack.Screen
           name="Login"
           component={Login}
-          options={{ headerShown: false }}
-        />
+          options={{ headerShown: false }}/>
         <Stack.Screen
           name="SignUp"
           component={SignUp}
@@ -41,7 +40,24 @@ function NavContainer() {
           name="Dashboard"
           component={Dashboard}
           options={{ headerLeft: null }} />
+        <Stack.Screen
+          name="ShowFullImg"
+          component={ShowFullImg}
+          options={{ headerBackTitle: null }} />
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
+          options={{ headerBackTitle: null }} />
+        <Stack.Screen
+          name="ProfileDashboard"
+          component={ProfileDashboard}
+          options={{ headerBackTitle: null }} />
+        <Stack.Screen
+          name="ForgotPasssword"
+          component={ForgotPasssword}
+          options={{ headerBackTitle: null }} />
       </Stack.Navigator>
+      
     </NavigationContainer>
   );
 }

@@ -4,6 +4,7 @@ import Logo from "./logo";
 import Loader from './loader'
 import Profile from "./profile";
 import ShowUsers from "./showUsers";
+import ChatBox from './chatBox'
 
 
 export {
@@ -12,5 +13,6 @@ export {
   Logo,
   Loader,
   Profile,
-  ShowUsers
+  ShowUsers,
+  ChatBox
 };

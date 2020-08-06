@@ -17,18 +17,19 @@ import { UpdateUser } from '../../network/user';
 import { deviceHeight } from '../../utility/styleHelper/appStyle';
 
 
-const Dashboard = ({ navigation }) => {
-  
+const ProfileDashboard = ({ navigation }) => {
   const globalState = useContext(Store);
   const [getScrollPosition, setScrollPosition] = useState(0);
   const { dispatchLoaderAction } = globalState;
   const [userDetail, setUserDetail] = useState({
     id: '',
     name: '',
-    profileImg: ''
+    profileImg: '',
+    email: ''
   });
 
-  const { name, profileImg } = userDetail;
+  
+  const { name, profileImg ,email} = userDetail;
   const [allUsers, setAllUsers] = useState([]);
 
 
@@ -40,31 +41,6 @@ const Dashboard = ({ navigation }) => {
           size={25}
           color='rgb(255,255,255)'
           style={{ right: 10 }}
-          onPress={() =>
-            Alert.alert(
-              'Logout',
-              'Are you sure to log out',
-              [
-                {
-                  text: 'Yes',
-                  onPress: () => logout(),
-                },
-                {
-                  text: 'No'
-                }
-              ], {
-              cancelabel: false
-            }
-            )}
-        />
-        
-      ),
-      headerLeft: () => (
-        <SimpleLineIcon
-          name="magnifier"
-          size={25}
-          color='rgb(255,255,255)'
-          style={{ left: 10 }}
           onPress={() =>
             Alert.alert(
               'Logout',
@@ -101,20 +77,26 @@ const Dashboard = ({ navigation }) => {
             id: "",
             name: "",
             profileImg: "",
+            email:""
           };
           dataSnapshot.forEach((child) => {
             if (uuid === child.val().uuid) {
               currentUser.id = uuid;
               currentUser.name = child.val().name;
               currentUser.profileImg = child.val().profileImg;
+              currentUser.email = child.val().email;
+              
             } else {
               users.push({
                 id: child.val().uuid,
                 name: child.val().name,
                 profileImg: child.val().profileImg,
+                email: child.val().email
               });
             }
           });
+          console.log(currentUser.id)
+          console.log(currentUser.name)
           setUserDetail(currentUser);
           setAllUsers(users);
           dispatchLoaderAction({
@@ -128,6 +110,7 @@ const Dashboard = ({ navigation }) => {
       });
     }
   }, []);
+  
 
   const selectPhotoTapped = () => {
     const options = {
@@ -136,56 +119,39 @@ const Dashboard = ({ navigation }) => {
       },
     };
 
-    Alert.alert(
-      'Edit',
-      'Are you sure to edit details',
-      [
-        {
-          text: 'Yes',
-          onPress: () => navigation.navigate('ProfileDashboard'),
-        },
-        {
-          text: 'No'
-        }
-      ], {
-      cancelabel: false
-    }
-    )
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log("Response = ", response);
 
-
-    // ImagePicker.showImagePicker(options, (response) => {
-    //   console.log("Response = ", response);
-
-    //   if (response.didCancel) {
-    //     console.log("User cancelled photo picker");
-    //   } else if (response.error) {
-    //     console.log("ImagePicker Error: ", response.error);
-    //   } else if (response.customButton) {
-    //     console.log("User tapped custom button: ", response.customButton);
-    //   } else {
-    //     // Base 64 image:
-    //     let source = "data:image/jpeg;base64," + response.data;
-    //     dispatchLoaderAction({
-    //       type: LOADING_START,
-    //     });
-    //     UpdateUser(uuid, source)
-    //       .then(() => {
-    //         setUserDetail({
-    //           ...userDetail,
-    //           profileImg: source,
-    //         });
-    //         dispatchLoaderAction({
-    //           type: LOADING_STOP,
-    //         });
-    //       })
-    //       .catch(() => {
-    //         alert(err);
-    //         dispatchLoaderAction({
-    //           type: LOADING_STOP,
-    //         });
-    //       });
-    //   }
-    // });
+      if (response.didCancel) {
+        console.log("User cancelled photo picker");
+      } else if (response.error) {
+        console.log("ImagePicker Error: ", response.error);
+      } else if (response.customButton) {
+        console.log("User tapped custom button: ", response.customButton);
+      } else {
+        // Base 64 image:
+        let source = "data:image/jpeg;base64," + response.data;
+        dispatchLoaderAction({
+          type: LOADING_START,
+        });
+        UpdateUser(uuid, source)
+          .then(() => {
+            setUserDetail({
+              ...userDetail,
+              profileImg: source,
+            });
+            dispatchLoaderAction({
+              type: LOADING_STOP,
+            });
+          })
+          .catch(() => {
+            alert(err);
+            dispatchLoaderAction({
+              type: LOADING_STOP,
+            });
+          });
+      }
+    });
   };
 
 
@@ -212,49 +178,25 @@ const Dashboard = ({ navigation }) => {
     }
   };
 
-  const nameTap = (profileImg, name, guestUserId) => {
-    if (!profileImg) {
-      navigation.navigate('Chat', {
-        name,
-        imgText: name.charAt(0),
-        guestUserId,
-        currentUserId: uuid
-      })
-    } else {
-      navigation.navigate('Chat', {
-        name,
-        img: profileImg,
-        guestUserId,
-        currentUserId: uuid
-      })
-    }
-  }
+  
 
 
   return (
     <SafeAreaView style={[globalStyle.flex1, { backgroundColor: color.PURPLE }]}>
       <FlatList
         alwaysBounceVertical={false}
-        data={allUsers}
         keyExtractor={(_, index) => index.toString()}
         ListHeaderComponent={
-          <Profile img={profileImg} name={name}
+          <Profile img={profileImg} name={name} 
             onEditImgTap={() => selectPhotoTapped()}
             onImgTap={() => imgTap(profileImg, name)}
           />
           
+          
         }
+        
 
 
-        renderItem={({ item }) => (
-          <ShowUsers
-            name={item.name}
-            img={item.profileImg}
-            onImgTap={() => imgTap(item.profileImg, item.name)}
-            onNameTap={() => nameTap(item.profileImg, item.name, item.id)}
-            
-          />
-        )}
       />
     </SafeAreaView>
 
@@ -262,4 +204,4 @@ const Dashboard = ({ navigation }) => {
 
 };
 
-export default Dashboard;
+export default ProfileDashboard;
